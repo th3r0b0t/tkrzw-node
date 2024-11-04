@@ -1,4 +1,5 @@
 #include "../include/config_parser.hpp"
+#include<iostream>
 
 std::map<std::string, std::string> parseConfig(const Napi::Env& env, Napi::String jsonConfig)
 {
@@ -11,6 +12,18 @@ std::map<std::string, std::string> parseConfig(const Napi::Env& env, Napi::Strin
     std::map<std::string, std::string> tkrzw_config_map;
 
     for (const auto &elem : js_parsed_config_obj)       //std::pair<Napi::Value, Napi::Object::PropertyLValue<?>>
+    {
+        tkrzw_config_map.emplace(elem.first.ToString().Utf8Value(), static_cast<Napi::Value>(elem.second).ToString().Utf8Value());
+    }
+
+    return tkrzw_config_map;
+}
+
+std::map<std::string, std::string> parseConfig(const Napi::Env& env, Napi::Object configObject)
+{
+    std::map<std::string, std::string> tkrzw_config_map;
+
+    for (const auto &elem : configObject)       //std::pair<Napi::Value, Napi::Object::PropertyLValue<?>>
     {
         tkrzw_config_map.emplace(elem.first.ToString().Utf8Value(), static_cast<Napi::Value>(elem.second).ToString().Utf8Value());
     }
