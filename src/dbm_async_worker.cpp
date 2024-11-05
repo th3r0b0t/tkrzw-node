@@ -16,23 +16,23 @@ operation(operation),
 deferred_promise{Env()}
 {};*/
 
-template <typename... argTypes>
+/*template <typename... argTypes>
 dbmAsyncWorker::dbmAsyncWorker(const Napi::Env& env, tkrzw::PolyDBM& dbmReference, OPERATION_TYPE operation, argTypes... paramPack):
 Napi::AsyncWorker(env),
 dbmReference(dbmReference),
 operation(operation),
-deferred_promise{Env()},
-params(std::make_tuple(paramPack...))
-{};
+deferred_promise{Env()}
+{
+    (params.emplace_back(std::any(paramPack)),...);
+};*/
 
 void dbmAsyncWorker::Execute()
 {
     if(operation == SET)
     {
-        if constexpr (std::tuple_size<decltype(params)>::value == 2)
+        if(params.size() == 2)
         {
-            std::string& p1 = std::get<0>(params);
-            tkrzw::Status set_status = dbmReference.Set( "", "" );
+            tkrzw::Status set_status = dbmReference.Set( std::any_cast<std::string>(params[0]), std::any_cast<std::string>(params[1]) );
             
             if( set_status != tkrzw::Status::SUCCESS)
             {
@@ -43,9 +43,9 @@ void dbmAsyncWorker::Execute()
     }
     else if(operation == GET_SIMPLE)
     {
-        if constexpr (std::tuple_size<decltype(params)>::value == 2)
+        if(params.size() == 2)
         {
-            result = dbmReference.GetSimple( "", "" );
+            result = dbmReference.GetSimple( std::any_cast<std::string>(params[0]), std::any_cast<std::string>(params[1]) );
             if(result == "PARAM2 HERE")
             {
                 std::string x = "PARAM1 HERE";
@@ -68,12 +68,12 @@ void dbmAsyncWorker::Execute()
     }
     else if(operation == REBUILD)
     {
-        if constexpr (std::tuple_size<decltype(params)>::value == 1)
+        if(params.size() == 1)
         {
-            tkrzw::Status rebuild_status = dbmReference.RebuildAdvanced( std::map<std::string,std::string>() );
+            tkrzw::Status rebuild_status = dbmReference.RebuildAdvanced( std::any_cast<std::map<std::string,std::string>>(params[0]) );
             if( rebuild_status != tkrzw::Status::SUCCESS)
             {
-                SetError("(rebuild) Error rebuilding database!");
+                SetError("[" + std::to_string(rebuild_status.GetCode()) + "]: " + rebuild_status.GetMessage());
             }
         }
     }

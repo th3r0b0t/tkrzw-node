@@ -143,6 +143,7 @@ Napi::Object databaseWrapper::Init(Napi::Env env, Napi::Object exports)
         InstanceMethod<&databaseWrapper::set>("set", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
         InstanceMethod<&databaseWrapper::getSimple>("getSimple", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
         InstanceMethod<&databaseWrapper::shouldBeRebuilt>("shouldBeRebuilt", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
+        InstanceMethod<&databaseWrapper::rebuild>("rebuild", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
         InstanceMethod<&databaseWrapper::close>("close", static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
 
