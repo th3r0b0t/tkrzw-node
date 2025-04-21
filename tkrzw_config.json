@@ -1,0 +1,16 @@
+{
+    "dbm": "HashDBM",
+    "offset_width": "4",
+    "align_pow": "7",
+    "num_buckets": "2000000",
+    "file": "MemoryMapParallelFile",
+    "min_read_size": "128",
+    "cache_buckets": "true",
+    "update_mode": "UPDATE_APPENDING",
+    "restore_mode": "RESTORE_SYNC:RESTORE_NO_SHORTCUTS:RESTORE_WITH_HARDSYNC",
+    "ulog_prefix": "./db/dbmLog",
+    "ulog_max_file_size": "128Mi",
+    "ulog_server_id": "555",
+    "ulog_dbm_index": "777",
+    "record_comp_mode": "RECORD_COMP_LZ4"
+}

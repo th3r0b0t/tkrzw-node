@@ -1,0 +1,46 @@
+{
+  "name": "tkrzw-node",
+  "type": "module",
+  "packageType": "module",
+  "version": "1.0.0",
+  "description": "Tkrzw DBM and Index bindings for Node.js",
+  "author": "Th3R0b0t",
+  "keywords":
+  [
+    "Tkrzw",
+    "DBM",
+    "Index",
+    "Database",
+    "key-value"
+  ],
+  "exports": {
+    ".": {
+      "require": "./index.cjs",
+      "import": "./index.mjs"
+    }
+  },
+  "main": "index.js",
+  "os": [ "linux" ],
+  "binary": { "napi_versions": [9] },
+  "dependencies":
+  {
+    "bindings": "*",
+    "cmake-js": "*",
+    "node-addon-api": "*"
+  },
+  "license": "ISC",
+  "bugs": "https://github.com/th3r0b0t/tkrzw-node/issues",
+  "repository":
+  {
+    "type": "git",
+    "url": "git+https://github.com/th3r0b0t/tkrzw-node.git"
+  },
+  "scripts":
+  {
+    "preinstall": "echo 'Please make sure cmake, ninja and gcc are installed!'",
+    "install": "cmake-js compile",
+    "clean": "cmake-js clean",
+    "rebuild": "cmake-js rebuild",
+    "rebuild:debug": "cmake-js rebuild --debug"
+  }
+}

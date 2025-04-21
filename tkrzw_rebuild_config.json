@@ -1,0 +1,11 @@
+{
+    "offset_width": "4",
+    "align_pow": "7",
+    "num_buckets": "2000000",
+    "min_read_size": "128",
+    "cache_buckets": "true",
+    "update_mode": "UPDATE_APPENDING",
+    "restore_mode": "RESTORE_SYNC:RESTORE_NO_SHORTCUTS:RESTORE_WITH_HARDSYNC",
+    "record_comp_mode": "RECORD_COMP_LZ4",
+    "sync_hard": "true"
+}
