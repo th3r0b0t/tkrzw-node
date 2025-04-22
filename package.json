@@ -2,7 +2,7 @@
   "name": "tkrzw-node",
   "type": "module",
   "packageType": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tkrzw DBM and Index bindings for Node.js",
   "author": "Th3R0b0t",
   "keywords":
@@ -37,7 +37,7 @@
   },
   "scripts":
   {
-    "preinstall": "echo 'Please make sure cmake, ninja and gcc are installed!'",
+    "preinstall": "echo 'Please make sure cmake, ninja-build, build-essential and liblz4-dev are installed!'",
     "install": "cmake-js compile",
     "clean": "cmake-js clean",
     "rebuild": "cmake-js rebuild",
