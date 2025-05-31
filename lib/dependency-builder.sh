@@ -3,7 +3,7 @@
 #printf "Current working dir should be inside lib, confirm it: \033[0;31m$(pwd)\n\033[0mIf it's not, use ctrl+c to stop script:\n"
 #read -p "Enter to continue or ctrl+c to stop:    "			#npm ignores this
 
-INSTALL_PREFIX=$(pwd)
+INSTALL_PREFIX="$(pwd)"
 
 [ ! -e sources/ ] || rm -rf sources/
 [ ! -e include/ ] || rm -rf include/
@@ -24,7 +24,7 @@ printf "\033[0;31mWe are going to build Tkrzw library, it can take several minut
 #read -p "Enter to start building or ctrl+c to stop:    "		#npm ignores this
 
 cd tkrzw-1.0.32
-./configure --enable-opt-native --enable-most-features --enable-lz4 --disable-shared --enable-static --prefix=$INSTALL_PREFIX
+./configure --enable-opt-native --enable-most-features --enable-lz4 --disable-zlib --disable-shared --enable-static --prefix=$INSTALL_PREFIX
 make
 make install
 
@@ -32,4 +32,4 @@ cd $INSTALL_PREFIX
 mv lib/libtkrzw.a ./
 rm -rf sources
 rm -rf lib
-rm -rf bin
+#rm -rf bin

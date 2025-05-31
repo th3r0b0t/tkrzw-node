@@ -3,11 +3,17 @@
 
 #include <any>
 #include <optional>
-#include <functional> // For std::reference_wrapper
+#include <functional>       //For std::reference_wrapper
 #include <vector>
+#include <iostream>
 #include <tkrzw_dbm_poly.h>
 #include <tkrzw_index.h>
+
+#include <memory>           //For std::unique_ptr
+#include <utility>          //For std::pair
 #include <napi.h>
+#include "utils/processor_jsfunc_wrapper.hpp"
+#include "utils/tsfn_types.hpp"
 
 class dbmAsyncWorker : public Napi::AsyncWorker
 {
@@ -19,6 +25,7 @@ class dbmAsyncWorker : public Napi::AsyncWorker
             DBM_SHOULD_BE_REBUILT,
             DBM_REBUILD,
             DBM_SYNC,
+            DBM_PROCESS,
 
             INDEX_ADD,
             INDEX_GET_VALUES,
@@ -26,7 +33,10 @@ class dbmAsyncWorker : public Napi::AsyncWorker
             INDEX_REMOVE,
             INDEX_SHOULD_BE_REBUILT,
             INDEX_REBUILD,
-            INDEX_SYNC
+            INDEX_SYNC,
+            INDEX_MAKE_JUMP_ITERATOR,
+            INDEX_GET_ITERATOR_VALUE,
+            INDEX_CONTINUE_ITERATION
         };
 
         /*dbmAsyncWorker(const Napi::Env& env, tkrzw::PolyDBM& dbmReference, OPERATION_TYPE operation, std::string param1, std::string param2);

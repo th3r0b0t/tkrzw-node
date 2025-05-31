@@ -5,6 +5,49 @@ const tkrzw =  createRequire(import.meta.url)('bindings')('tkrzw-node')
 
 export default { polyDBM: tkrzw.polyDBM, polyIndex: tkrzw.polyIndex };
 
+/*import fs from "node:fs"
+
+let tkrzw_config = fs.readFileSync('./tkrzw_config.json', 'utf8');
+console.log("tkrzw.polyDBM:", tkrzw.polyDBM, "tkrzw.polyDBM.NOOP:", tkrzw.polyDBM.NOOP, "Object.getOwnPropertyNames:", Object.getOwnPropertyNames(tkrzw.polyDBM))
+const db1 = new tkrzw.polyDBM(JSON.parse(tkrzw_config), "db/YaHeidar.tkh");
+
+await db1.set("Heidar(a)", "Mola Amir-al-momenin");
+console.log( "1:", await db1.getSimple("Heidar(a)", "Key not_set") );
+await db1.process("Heidar(a)", (keyExists, key, value)=>{
+    console.log("keyExists:", keyExists, "key:", key, "value:", value);
+    //return "THANK YOU MY LORD; PLEASE HELP"//tkrzw.polyDBM.NOOP;
+    return tkrzw.polyDBM.NOOP;
+    // return tkrzw.polyDBM.REMOVE;
+},true);
+console.log( "2:", await db1.getSimple("Heidar(a)", "Key not_set") );
+*/
+
+/*import fs from "node:fs"
+
+let tkrzw_config = fs.readFileSync("./tkrzw_index_config.json", 'utf8');
+const idx1 = new tkrzw.polyIndex(tkrzw_config, "./db/index_YaHeidar.tkt");
+await idx1.add("Imam 1", "Heidar(a)");
+await idx1.add("Imam 2", "Hassan(a)");
+await idx1.add("Imam 3", "Hussain(a)");
+
+await idx1.makeJumpIterator("Imam");
+
+let res;
+while( true )
+{
+    try
+    {
+        console.log( await idx1.getIteratorValue() );
+        await idx1.continueIteration();
+    }
+    catch(err){
+        console.error(err); break;
+    }
+}
+
+idx1.freeIterator();
+idx1.close();*/
+
 /*var fs = require('fs');
 let tkrzw_config = fs.readFileSync('./tkrzw_config.json', 'utf8');
 const db1 = new tkrzw.polyDBM(JSON.parse(tkrzw_config), "YaHeidar.tkh");*/

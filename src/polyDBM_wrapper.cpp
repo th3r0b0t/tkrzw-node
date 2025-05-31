@@ -4,18 +4,9 @@
 polyDBM_wrapper::polyDBM_wrapper(const Napi::CallbackInfo& info) : Napi::ObjectWrap<polyDBM_wrapper>(info)
 {
     Napi::Env env = info.Env();
-    std::map<std::string, std::string> optional_tuning_params;
-    if(info[0].IsString())
-    {
-        Napi::String jsonConfigString = info[0].As<Napi::String>();
-        optional_tuning_params = parseConfig(env, jsonConfigString);
-    }
-    else if(info[0].IsObject())
-    {
-        Napi::Object configObject = info[0].As<Napi::Object>();
-        optional_tuning_params = parseConfig(env, configObject);
-    }
-    std::string dbmPath = info[1].As<Napi::String>().ToString().Utf8Value();
+
+    std::map<std::string, std::string> optional_tuning_params = parseConfig(env, info[0]);
+    std::string dbmPath = info[1].As<Napi::String>();       //The operator std::string() is implicitly invoked
 
     tkrzw::Status opening_status = dbm.OpenAdvanced(dbmPath, true, tkrzw::File::OPEN_DEFAULT | tkrzw::File::OPEN_SYNC_HARD, optional_tuning_params).OrDie();
     if( opening_status != tkrzw::Status::SUCCESS)
@@ -30,7 +21,7 @@ Napi::Value polyDBM_wrapper::set(const Napi::CallbackInfo& info)
     std::string key = info[0].As<Napi::String>().ToString().Utf8Value();
     std::string value = info[1].As<Napi::String>().ToString().Utf8Value();
 
-    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(Env(), dbm, dbmAsyncWorker::DBM_SET, key, value);
+    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(env, dbm, dbmAsyncWorker::DBM_SET, key, value);
     asyncWorker->Queue();
     return asyncWorker->deferred_promise.Promise();
     
@@ -50,7 +41,7 @@ Napi::Value polyDBM_wrapper::getSimple(const Napi::CallbackInfo& info)
     std::string key = info[0].As<Napi::String>().ToString().Utf8Value();
     std::string default_value = info[1].As<Napi::String>().ToString().Utf8Value();
 
-    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(Env(), dbm, dbmAsyncWorker::DBM_GET_SIMPLE, key, default_value);
+    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(env, dbm, dbmAsyncWorker::DBM_GET_SIMPLE, key, default_value);
     asyncWorker->Queue();
     return asyncWorker->deferred_promise.Promise();
     
@@ -61,7 +52,8 @@ Napi::Value polyDBM_wrapper::getSimple(const Napi::CallbackInfo& info)
 
 Napi::Value polyDBM_wrapper::shouldBeRebuilt(const Napi::CallbackInfo& info)
 {
-    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(Env(), dbm, dbmAsyncWorker::DBM_SHOULD_BE_REBUILT);
+    Napi::Env env = info.Env();
+    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(env, dbm, dbmAsyncWorker::DBM_SHOULD_BE_REBUILT);
     asyncWorker->Queue();
     return asyncWorker->deferred_promise.Promise();
     
@@ -73,19 +65,10 @@ Napi::Value polyDBM_wrapper::shouldBeRebuilt(const Napi::CallbackInfo& info)
 Napi::Value polyDBM_wrapper::rebuild(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
-    std::map<std::string, std::string> optional_tuning_params;
-    if(info[0].IsString())
-    {
-        Napi::String jsonConfigString = info[0].As<Napi::String>();
-        optional_tuning_params = parseConfig(env, jsonConfigString);
-    }
-    else if(info[0].IsObject())
-    {
-        Napi::Object configObject = info[0].As<Napi::Object>();
-        optional_tuning_params = parseConfig(env, configObject);
-    }
 
-    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(Env(), dbm, dbmAsyncWorker::DBM_REBUILD, optional_tuning_params);
+    std::map<std::string, std::string> optional_tuning_params = parseConfig(env, info[0]);
+
+    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(env, dbm, dbmAsyncWorker::DBM_REBUILD, optional_tuning_params);
     asyncWorker->Queue();
     return asyncWorker->deferred_promise.Promise();
     
@@ -97,9 +80,29 @@ Napi::Value polyDBM_wrapper::rebuild(const Napi::CallbackInfo& info)
 Napi::Value polyDBM_wrapper::sync(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
-    bool sync_hard = info[0].As<Napi::Boolean>().ToBoolean();
+    bool sync_hard = info[0].As<Napi::Boolean>();
 
-    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(Env(), dbm, dbmAsyncWorker::DBM_SYNC, sync_hard);
+    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(env, dbm, dbmAsyncWorker::DBM_SYNC, sync_hard);
+    asyncWorker->Queue();
+    return asyncWorker->deferred_promise.Promise();
+}
+
+Napi::Value polyDBM_wrapper::process(const Napi::CallbackInfo& info)
+{
+    Napi::Env env = info.Env();
+    std::string key = info[0].As<Napi::String>();
+    Napi::Function jsprocessor = info[1].As<Napi::Function>();
+    bool writable = info[2].As<Napi::Boolean>();
+
+    TSFN tsfn = TSFN::New(
+    env,
+    jsprocessor,         // JS function to call
+    "processor_jsfunc_wrapper tsfn",
+    0,                  // Unlimited queue
+    1                  // Initial thread count
+    );
+
+    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(env, dbm, dbmAsyncWorker::DBM_PROCESS, key, writable, tsfn );
     asyncWorker->Queue();
     return asyncWorker->deferred_promise.Promise();
 }
@@ -123,6 +126,10 @@ Napi::Value polyDBM_wrapper::close(const Napi::CallbackInfo& info)
 //-----------------JS-Requirements-----------------//
 Napi::Object polyDBM_wrapper::Init(Napi::Env env, Napi::Object exports)
 {
+    // Initialization
+    ::noopSym = Napi::String::New(env, "___TKRZW_NOOP___");
+    ::removeSym = Napi::String::New(env, "___TKRZW_REMOVE___");
+
     // This method is used to hook the accessor and method callbacks
     Napi::Function functionList = DefineClass(env, "polyDBM",
     {
@@ -131,26 +138,45 @@ Napi::Object polyDBM_wrapper::Init(Napi::Env env, Napi::Object exports)
         InstanceMethod<&polyDBM_wrapper::shouldBeRebuilt>("shouldBeRebuilt", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
         InstanceMethod<&polyDBM_wrapper::rebuild>("rebuild", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
         InstanceMethod<&polyDBM_wrapper::sync>("sync", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
-        InstanceMethod<&polyDBM_wrapper::close>("close", static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+        InstanceMethod<&polyDBM_wrapper::process>("process", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
+        InstanceMethod<&polyDBM_wrapper::close>("close", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
+        StaticValue("NOOP", noopSym, static_cast<napi_property_attributes>(napi_enumerable)),
+        StaticValue("REMOVE", removeSym, static_cast<napi_property_attributes>(napi_enumerable))
     });
 
+    /*Napi::Symbol noopSym = Napi::Symbol::New(env, "NOOP");
+    Napi::Symbol removeSym = Napi::Symbol::New(env, "REMOVE");
+
+    functionList.DefineProperties({
+        Napi::PropertyDescriptor::Value("NOOP", noopSym, napi_enumerable),
+        Napi::PropertyDescriptor::Value("REMOVE", removeSym, napi_enumerable)
+    });*/
+
+    // Create symbols and attach them as static properties of the class
+    // These symbols are to be returned to indicate tkrzw::RecordProcessor:NOOP/REMOVE
+    //functionList.Set("NOOP", Napi::Symbol::New(env, "NOOP"));
+    //functionList.Set("REMOVE", Napi::Symbol::New(env, "REMOVE"));
+
+    // Data set using `env.SetInstanceData` associated with the instance of the add-on for the duration of its lifecycle.
+    // We store ctor reference so we can get symbols back by `Napi::Function polyDBMConstructor = env.GetInstanceData<Napi::FunctionReference>()->Value()`.
+    // IMPORTANT: `env.SetInstanceData<T>(...)` and `env.GetInstanceData<T>()` are template-based and allow one instance per type T per environment.
+    // If you call `env.SetInstanceData<Napi::FunctionReference>(...)` twice, the second call overwrites the first.
     Napi::FunctionReference* constructor = new Napi::FunctionReference();
-
     *constructor = Napi::Persistent(functionList);
-    exports.Set("polyDBM", functionList);
     env.SetInstanceData<Napi::FunctionReference>(constructor);
-
+    
+    exports.Set("polyDBM", functionList);
     return exports;
 }
 
 void polyDBM_wrapper::Finalize(Napi::BasicEnv env)
 {
-    tkrzw::Status close_status = dbm.Close();
-    if( close_status != tkrzw::Status::SUCCESS)
+    if( dbm.IsOpen() )
     {
-        std::cerr << "DBM finalize: Failed!" << std::endl;
+        if( dbm.Close() != tkrzw::Status::SUCCESS)
+        {
+            std::cerr << "DBM finalize: Failed!" << std::endl;
+        }
     }
-    else
-    { std::cerr << "DBM finalize: SUCCESS!" << std::endl; }   
 }
 //-----------------JS-Requirements-----------------//

@@ -84,6 +84,17 @@ void dbmAsyncWorker::Execute()
             SetError("[" + std::to_string(sync_status.GetCode()) + "]: " + sync_status.GetMessage());
         }
     }
+    else if(operation == DBM_PROCESS)
+    {
+        std::string key = std::any_cast<std::string>(params[0]);
+        bool writable = std::any_cast<bool>(params[1]);
+        TSFN tsfn = std::any_cast<TSFN>(params[2]);
+
+        processor_jsfunc_wrapper* processorWrapper = new processor_jsfunc_wrapper(tsfn);
+        tkrzw::Status process_status = dbmReference->get().Process(key, processorWrapper, writable);
+
+        tsfn.Release();
+    }
     //===============================================INDEX_METHODS
     else if(operation == INDEX_ADD)
     {
@@ -95,7 +106,6 @@ void dbmAsyncWorker::Execute()
     }
     else if(operation == INDEX_GET_VALUES)
     {
-        std::cerr << "!!!INDEX_GET_VALUES!!!: " << std::any_cast<std::string>(params[0]) << std::any_cast<std::size_t>(params[1]) << std::endl;
         any_result = indexReference->get().GetValues( std::any_cast<std::string>(params[0]), std::any_cast<std::size_t>(params[1]) );
     }
     else if(operation == INDEX_CHECK)
@@ -143,6 +153,25 @@ void dbmAsyncWorker::Execute()
             SetError("(sync) Error dynchronizing index!");
         }
     }
+    else if(operation == INDEX_MAKE_JUMP_ITERATOR)
+    {
+        std::string partialKey = std::any_cast<std::string>(params[0]);
+        tkrzw::PolyIndex::Iterator* jump_iter = std::any_cast<tkrzw::PolyIndex::Iterator*>(params[1]);
+        jump_iter->Jump(partialKey);    //`tkrzw::PolyIndex::Iterator::Jump` is `void`
+    }
+    else if(operation == INDEX_GET_ITERATOR_VALUE)
+    {
+        tkrzw::PolyIndex::Iterator* jump_iter = std::any_cast<tkrzw::PolyIndex::Iterator*>(params[0]);
+        std::pair<std::string, std::string> key_value;
+        //`tkrzw::PolyIndex::Iterator::Get` returns `true` or `false`!
+        if( jump_iter->Get(&key_value.first, &key_value.second) ) { any_result = key_value; }
+        else { SetError("(getIteratorValue) No record to fetch!"); }
+    }
+    else if(operation == INDEX_CONTINUE_ITERATION)
+    {
+        tkrzw::PolyIndex::Iterator* jump_iter = std::any_cast<tkrzw::PolyIndex::Iterator*>(params[0]);
+        jump_iter->Next();  //`tkrzw::PolyIndex::Iterator::Next` is `void`
+    }
 }
 
 void dbmAsyncWorker::OnOK()
@@ -161,6 +190,14 @@ void dbmAsyncWorker::OnOK()
     else if(operation == DBM_GET_SIMPLE)
     {
         deferred_promise.Resolve( Napi::String::New( Env(), std::any_cast<std::string>(any_result) ) );
+    }
+    else if(operation == INDEX_GET_ITERATOR_VALUE)
+    {
+        std::pair<std::string, std::string>& casted_key_value = std::any_cast<std::pair<std::string, std::string>&>(any_result);
+        Napi::Object key_value_obj = Napi::Object::New(Env());
+        key_value_obj.Set("key", casted_key_value.first);
+        key_value_obj.Set("value", casted_key_value.second);
+        deferred_promise.Resolve( key_value_obj );
     }
     else { deferred_promise.Resolve( Env().Undefined() ); }
 }

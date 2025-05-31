@@ -19,7 +19,7 @@
       "import": "./index.mjs"
     }
   },
-  "main": "index.js",
+  "main": "index.mjs",
   "os": [ "linux" ],
   "binary": { "napi_versions": [9] },
   "dependencies":

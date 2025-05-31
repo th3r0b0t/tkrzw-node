@@ -5,6 +5,8 @@
 #include "config_parser.hpp"
 #include "dbm_async_worker.hpp"
 #include <napi.h>
+#include "utils/globals.hpp"
+#include <iostream>
 
 class polyDBM_wrapper : public Napi::ObjectWrap<polyDBM_wrapper>
 {
@@ -20,6 +22,7 @@ class polyDBM_wrapper : public Napi::ObjectWrap<polyDBM_wrapper>
         Napi::Value shouldBeRebuilt(const Napi::CallbackInfo& info);            //async promise
         Napi::Value rebuild(const Napi::CallbackInfo& info);                    //async promise
         Napi::Value sync(const Napi::CallbackInfo& info);                       //async promise
+        Napi::Value process(const Napi::CallbackInfo& info);                    //async promise
         Napi::Value close(const Napi::CallbackInfo& info);
         void Finalize(Napi::BasicEnv env);
 };

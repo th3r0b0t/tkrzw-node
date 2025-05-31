@@ -11,7 +11,7 @@ add_definitions(-DNODE_ADDON_API_ENABLE_TYPE_CHECK_ON_AS)
 add_definitions(-DNODE_ADDON_API_CPP_EXCEPTIONS_ALL)
 
 # Get all files under specified paths:
-file(GLOB SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*")
+file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*")
 
 if( NOT (EXISTS "${CMAKE_SOURCE_DIR}/lib/libtkrzw.a") )
     message(STATUS "Couldn't find Tkrzw library under ${CMAKE_SOURCE_DIR}/lib/! Let's build the library...")
@@ -24,7 +24,7 @@ if( NOT (EXISTS "${CMAKE_SOURCE_DIR}/lib/libtkrzw.a") )
 			WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/"
 			COMMAND_ECHO STDOUT)
 else()
-    message(STATUS "Found Tkrzw library under ${CMAKE_SOURCE_DIR}/lib/! proceeding...")
+    message(STATUS "Found Tkrzw library under '${CMAKE_SOURCE_DIR}/lib/'! proceeding...")
 endif()
 
 
@@ -33,7 +33,7 @@ endif()
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC})
 # Gives our library file a .node extension without any "lib" prefix
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-include_directories(${CMAKE_JS_INC} ${CMAKE_SOURCE_DIR}/lib/include)
+include_directories(${CMAKE_JS_INC} ${CMAKE_SOURCE_DIR}/lib/include ${CMAKE_SOURCE_DIR}/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 
 # Essential library files to link to a node addon
