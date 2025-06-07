@@ -35,6 +35,18 @@ Napi::Value polyDBM_wrapper::set(const Napi::CallbackInfo& info)
     { return Napi::Boolean::New(env, true); }*/
 }
 
+Napi::Value polyDBM_wrapper::append(const Napi::CallbackInfo& info)
+{
+    Napi::Env env = info.Env();
+    std::string key = info[0].As<Napi::String>().ToString().Utf8Value();
+    std::string value = info[1].As<Napi::String>().ToString().Utf8Value();
+    std::string delimeter = info.Length() == 3 ? info[2].As<Napi::String>().ToString().Utf8Value() : "";
+
+    dbmAsyncWorker* asyncWorker = new dbmAsyncWorker(env, dbm, dbmAsyncWorker::DBM_APPEND, key, value, delimeter);
+    asyncWorker->Queue();
+    return asyncWorker->deferred_promise.Promise();
+}
+
 Napi::Value polyDBM_wrapper::getSimple(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
@@ -134,6 +146,7 @@ Napi::Object polyDBM_wrapper::Init(Napi::Env env, Napi::Object exports)
     Napi::Function functionList = DefineClass(env, "polyDBM",
     {
         InstanceMethod<&polyDBM_wrapper::set>("set", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
+        InstanceMethod<&polyDBM_wrapper::append>("append", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
         InstanceMethod<&polyDBM_wrapper::getSimple>("getSimple", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
         InstanceMethod<&polyDBM_wrapper::shouldBeRebuilt>("shouldBeRebuilt", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
         InstanceMethod<&polyDBM_wrapper::rebuild>("rebuild", static_cast<napi_property_attributes>(napi_writable | napi_configurable)),

@@ -21,6 +21,7 @@ class dbmAsyncWorker : public Napi::AsyncWorker
         enum OPERATION_TYPE
         {
             DBM_SET,
+            DBM_APPEND,
             DBM_GET_SIMPLE,
             DBM_SHOULD_BE_REBUILT,
             DBM_REBUILD,

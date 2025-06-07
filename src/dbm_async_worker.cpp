@@ -41,6 +41,15 @@ void dbmAsyncWorker::Execute()
             }
         //}
     }
+    if(operation == DBM_APPEND)
+    {
+        tkrzw::Status append_status = dbmReference->get().Append( std::any_cast<std::string>(params[0]), std::any_cast<std::string>(params[1]), std::any_cast<std::string>(params[2]) );
+        
+        if( append_status != tkrzw::Status::SUCCESS)
+        {
+            SetError("Couldn't append!");
+        }
+    }
     else if(operation == DBM_GET_SIMPLE)
     {
         //if(params.size() == 2)

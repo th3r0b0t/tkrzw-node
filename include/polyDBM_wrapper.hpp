@@ -18,6 +18,7 @@ class polyDBM_wrapper : public Napi::ObjectWrap<polyDBM_wrapper>
         static Napi::Object Init(Napi::Env env, Napi::Object exports);          //required by Node!
         polyDBM_wrapper(const Napi::CallbackInfo& info);
         Napi::Value set(const Napi::CallbackInfo& info);                        //async promise
+        Napi::Value append(const Napi::CallbackInfo& info);                     //async promise
         Napi::Value getSimple(const Napi::CallbackInfo& info);                  //async promise
         Napi::Value shouldBeRebuilt(const Napi::CallbackInfo& info);            //async promise
         Napi::Value rebuild(const Napi::CallbackInfo& info);                    //async promise

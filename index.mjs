@@ -11,7 +11,7 @@ let tkrzw_config = fs.readFileSync('./tkrzw_config.json', 'utf8');
 console.log("tkrzw.polyDBM:", tkrzw.polyDBM, "tkrzw.polyDBM.NOOP:", tkrzw.polyDBM.NOOP, "Object.getOwnPropertyNames:", Object.getOwnPropertyNames(tkrzw.polyDBM))
 const db1 = new tkrzw.polyDBM(JSON.parse(tkrzw_config), "db/YaHeidar.tkh");
 
-await db1.set("Heidar(a)", "Mola Amir-al-momenin");
+await db1.append("Heidar(a)", "Mola Amir-al-momenin");
 console.log( "1:", await db1.getSimple("Heidar(a)", "Key not_set") );
 await db1.process("Heidar(a)", (keyExists, key, value)=>{
     console.log("keyExists:", keyExists, "key:", key, "value:", value);
@@ -19,8 +19,12 @@ await db1.process("Heidar(a)", (keyExists, key, value)=>{
     return tkrzw.polyDBM.NOOP;
     // return tkrzw.polyDBM.REMOVE;
 },true);
+await db1.append("Heidar(a)", "Mola Amir-al-momenin", ",");
 console.log( "2:", await db1.getSimple("Heidar(a)", "Key not_set") );
+await db1.append("Heidar(a)", "Mola Amir-al-momenin");
+console.log( "3:", await db1.getSimple("Heidar(a)", "Key not_set") );
 */
+
 
 /*import fs from "node:fs"
 
