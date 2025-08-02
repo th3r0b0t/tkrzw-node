@@ -182,7 +182,8 @@ Napi::Object polyDBM_wrapper::Init(Napi::Env env, Napi::Object exports)
     return exports;
 }
 
-void polyDBM_wrapper::Finalize(Napi::BasicEnv env)
+// As DBM objects are not expected to go outta scope rapidly, It doesn't really much of a gain to use `Napi::BasicEnv`, however it adds dependency on Node-addon-api ^8.2.0 so we're better off not using it
+void polyDBM_wrapper::Finalize(Napi::Env env)
 {
     if( dbm.IsOpen() )
     {

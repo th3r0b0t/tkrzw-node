@@ -12,3 +12,7 @@
 ### feature
 - Refer to commit message
 - Added this file (CHANGELOG.md) may Gitlab's merge bot give me a break
+## [1.2.1]
+### feature
+- Refer to commit message
+- Added this file (CHANGELOG.md) may Gitlab's merge bot give me a break

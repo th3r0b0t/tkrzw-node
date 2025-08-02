@@ -25,7 +25,7 @@ class polyDBM_wrapper : public Napi::ObjectWrap<polyDBM_wrapper>
         Napi::Value sync(const Napi::CallbackInfo& info);                       //async promise
         Napi::Value process(const Napi::CallbackInfo& info);                    //async promise
         Napi::Value close(const Napi::CallbackInfo& info);
-        void Finalize(Napi::BasicEnv env);
+        void Finalize(Napi::Env env);                                           //See method definition for details
 };
 
 
